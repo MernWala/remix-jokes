@@ -1,7 +1,17 @@
-import type { ActionFunctionArgs } from "@remix-run/node";
+import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
 import { redirect } from "@remix-run/node";
-import { json, useActionData } from "@remix-run/react";
+import { Form, isRouteErrorResponse, json, Link, useActionData, useNavigation, useRouteError } from "@remix-run/react";
+import { JokeDisplay } from "~/components/joke";
 import { db } from "~/utils/db.server";
+import { getUserId, requireUserId } from "~/utils/session.server";
+
+export const loader = async ({ request }: LoaderFunctionArgs) => {
+    const userId = await getUserId(request);
+    if (!userId) {
+        throw new Response("Unauthorized", { status: 401 });
+    }
+    return json({});
+};
 
 function validateJokeContent(content: string) {
     if (content.length < 10) {
@@ -16,6 +26,7 @@ function validateJokeName(name: string) {
 }
 
 export const action = async ({ request }: ActionFunctionArgs) => {
+    const userId = await requireUserId(request);
     const form = await request.formData();
     const content = form.get("content");
     const name = form.get("name");
@@ -42,18 +53,51 @@ export const action = async ({ request }: ActionFunctionArgs) => {
         }, { status: 400 });
     }
 
-    const joke = await db.joke.create({ data: fields });
+    const joke = await db.joke.create({ data: { ...fields, jokesterId: userId } });
     return redirect(`/jokes/${joke.id}`);
 };
 
-export default function NewJokeRoute() {
+export function ErrorBoundary() {
 
+    const error = useRouteError()
+
+    if (isRouteErrorResponse(error) && error.status === 401) {
+        return (
+            <div className="error-container">
+                <p>You must be logged in to create a joke.</p>
+                <Link to="/login">Login</Link>
+            </div>
+        );
+    }
+
+    return (
+        <div className="error-container">
+            Something unexpected went wrong. Sorry about that.
+        </div>
+    );
+}
+
+export default function NewJokeRoute() {
     const actionData = useActionData<typeof action>();
+    const navigation = useNavigation();
+
+    if (navigation.formData) {
+        const content = navigation.formData.get("content");
+        const name = navigation.formData.get("name");
+        if (
+            typeof content === "string" &&
+            typeof name === "string" &&
+            !validateJokeContent(content) &&
+            !validateJokeName(name)
+        ) {
+            return <JokeDisplay canDelete={false} isOwner={true} joke={{ name, content }} />
+        }
+    }
 
     return (
         <div>
             <p>Add your own hilarious joke</p>
-            <form method="post">
+            <Form method="post">
                 <div>
                     <label>
                         Name:{" "}
@@ -89,7 +133,7 @@ export default function NewJokeRoute() {
                     )}
                     <button type="submit" className="button"> Add </button>
                 </div>
-            </form>
+            </Form>
         </div>
     );
 }
