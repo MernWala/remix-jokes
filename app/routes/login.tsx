@@ -2,7 +2,7 @@ import type { ActionFunctionArgs, LinksFunction, MetaFunction } from "@remix-run
 import { Form, json, Link, useActionData, useSearchParams } from "@remix-run/react";
 import { db } from "~/utils/db.server";
 import { createUserSession, login, register } from "~/utils/session.server";
-import loginStyles from "~/styles/login.css";
+import "~/styles/login.css";
 
 function validateUsername(username: string) {
     if (username.length < 3) {
@@ -23,10 +23,6 @@ function validateUrl(url: string) {
     }
     return "/jokes";
 }
-
-export const links: LinksFunction = () => [
-    { type: "stylesheet", href: loginStyles, rel: "stylesheet" },
-]
 
 export const meta: MetaFunction = () => {
     const description = "Login to submit your own jokes to Remix Jokes!";

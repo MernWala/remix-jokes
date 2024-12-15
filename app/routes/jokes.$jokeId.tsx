@@ -1,5 +1,5 @@
 import { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
-import { Form, isRouteErrorResponse, json, Link, redirect, useLoaderData, useParams, useRouteError } from "@remix-run/react";
+import { isRouteErrorResponse, json, redirect, useLoaderData, useParams, useRouteError } from "@remix-run/react";
 import { JokeDisplay } from "~/components/joke";
 import { db } from "~/utils/db.server";
 import { getUserId, requireUserId } from "~/utils/session.server";

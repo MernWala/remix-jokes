@@ -1,15 +1,9 @@
 import { isRouteErrorResponse, Links, LiveReload, Meta, Outlet, Scripts, useRouteError } from "@remix-run/react";
 import type { PropsWithChildren } from "react";
-import { LinksFunction, MetaFunction } from "@remix-run/node";
-import globalStyle from "~/styles/global.css"
-import globalLargeResponsive from "~/styles/global-large.css";
-import globalSmallResponsive from "~/styles/global-medium.css";
-
-export const links: LinksFunction = () => [
-  { type: "stylesheet", href: globalStyle, rel: "stylesheet" },
-  { type: "stylesheet", href: globalLargeResponsive, rel: "stylesheet" },
-  { type: "stylesheet", href: globalSmallResponsive, rel: "stylesheet" }
-]
+import { MetaFunction } from "@remix-run/node";
+import "~/styles/global.css"
+import "~/styles/global-large.css";
+import "~/styles/global-medium.css";
 
 export const meta: MetaFunction = () => {
   const description = "Learn Remix and laugh at the same time!";
